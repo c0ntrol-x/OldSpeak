@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Design &#8212; oldspeak 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/better.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Source Code Access" href="source-code.html" />
+    <link rel="prev" title="Oldspeak" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  </head>
+  <body role="document">
+    <header id="pageheader"><h1><a href="index.html ">
+        oldspeak 0.0.1 documentation
+    </a></h1></header>
+  <div class="related top">
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="index.html" title="Previous document">Oldspeak</a>
+        </li>
+        <li>
+          <a href="source-code.html" title="Next document">Source Code Access</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+  <nav id="breadcrumbs">
+    <ul>
+      <li><a href="index.html">oldspeak 0.0.1 documentation</a></li> 
+    </ul>
+  </nav>
+  </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="design">
+<h1>Design<a class="headerlink" href="#design" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>*the service*</strong> - the oldspeak web app itself</li>
+<li><strong>*user*</strong> - an anonymous person</li>
+<li><strong>*server*</strong> - a cloud server that runs <em>the service</em></li>
+<li><strong>*http mainstream*</strong> - the nginx instance running in a <em>server</em> and
+proxying <em>the service</em></li>
+<li><strong>*member*</strong> - someone who has access to <em>the service</em></li>
+<li><strong>*document*</strong> - a text source + its metadata, versioned and
+encrypted at rest in the server&#8217;s filesystem</li>
+<li><strong>*owner*</strong> - a <em>member</em> that owns one or more <em>documents</em></li>
+<li><strong>*fingerprint*</strong> - the GPG fingerprint of a <em>member</em> or <em>owner</em></li>
+<li><strong>*invitation*</strong> - when a <em>member</em> adds another <em>fingerprint</em> to the
+service</li>
+<li><strong>*public key*</strong> - a PGP public key armored in text-mode</li>
+<li><strong>*metadoc*</strong> - the metadata of a document file (contains
+information like: its <em>owner&#8217;s</em> <em>fingerprint</em>, creation date etc.)</li>
+<li><strong>*essay*</strong> - a document that is published publicly in a permanent
+url.</li>
+<li><strong>*sys-admin*</strong> - a person who has access to both <em>the service</em>
+running in a <em>server</em></li>
+<li><strong>*application logs*</strong> - all logs coming from <em>the service</em></li>
+<li><strong>*server logs*</strong> - all logs coming from the <em>http mainstream
+server</em></li>
+<li><strong>*public logs*</strong> - an aggregated anachronic stream that splices up
+all <em>application logs</em></li>
+<li><dl class="first docutils">
+<dt><strong>*storage system*</strong> - an internal subsystem of <em>the service</em> whose</dt>
+<dd>contents are encrypted at rest and can only be accessed by a
+<em>sys-admin</em>.</dd>
+</dl>
+</li>
+<li><strong>*known fingerprint*</strong> - a <em>fingerprint</em> that is allowed to join or access <em>the service</em></li>
+<li><strong>*gpg ciphertext*</strong> - data encrypted with a <em>public key</em> and</li>
+</ul>
+<p>Authentication Mechanism</p>
+<ol class="arabic">
+<li><p class="first"><em>the service</em> has an internal storage that is encrypted and</p>
+</li>
+<li><p class="first"><em>The service</em> is available on the <em>server</em> url: <a href="#id1"><span class="problematic" id="id2">`https://r131733.xyz`_</span></a>:</p>
+</li>
+<li><p class="first">A <em>user</em> can join <em>the service</em> by acessing  <a class="reference external" href="https://r131733.xyz/join">/join</a>:
+1. The <em>user</em> provide its <em>public key</em>
+2. <em>The service</em> validates that the given <em>public key</em> matches a <em>known fingerprint</em>, blocking the access if unknown.
+3. <em>The service</em> generates a unique one-time password and encrypts it using the <em>user&#8217;s</em> <em>public key</em>
+4. The <em>user</em> is prompted to decrypt a <em>gpg ciphertext</em> which shall result in a one-time password
+5. The <em>user</em> puts the one-time password in and submits the form
+6. The <em>user</em> is now a <em>member</em> and its email will be extracted</p>
+<blockquote>
+<div><p>from the <em>public key</em> metadata for later cross-reference with a <em>known fingerprint</em>.</p>
+</div></blockquote>
+<ol class="arabic simple" start="7">
+<li>The <em>user</em> is now an authenticated <em>member</em></li>
+</ol>
+</li>
+<li><p class="first">A <em>user</em> can sign-in <em>the service</em> by acessing  <a class="reference external" href="https://r131733.xyz/login">/login</a>:
+1. The <em>user</em> is prompted with its email address, which shall belong to a <em>known fingerprint</em>.
+2. The <em>user</em> is prompted to decrypt a <em>gpg ciphertext</em> which shall result in a one-time password
+3. The <em>user</em> puts the one-time password in and submits the form
+4. The <em>user</em> is now an authenticated <em>member</em></p>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Design</a><ul>
+<li><a class="reference internal" href="#definitions">Definitions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Oldspeak</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="source-code.html"
+                        title="next chapter">Source Code Access</a></p>
+<div class="sourcelink">
+  <a href="_sources/design.rst.txt" rel="nofollow">
+    Show page source
+  </a>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="related bottom">
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="index.html" title="Previous document">Oldspeak</a>
+        </li>
+        <li>
+          <a href="source-code.html" title="Next document">Source Code Access</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+  <nav id="breadcrumbs">
+    <ul>
+      <li><a href="index.html">oldspeak 0.0.1 documentation</a></li> 
+    </ul>
+  </nav>
+  </div>
+  <footer id="pagefooter">&copy; 2017, Ð4√¡η¢Ч.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a>
+      1.5.1
+        with the <a href="http://github.com/irskep/sphinx-better-theme">
+          better</a> theme.
+
+  </footer>
+
+  
+  </body>
+</html>
