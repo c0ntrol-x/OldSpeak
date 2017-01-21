@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 import pygit2
 from plant import Node
 from pygit2 import Repository
 from pygit2 import init_repository
+from pygit2 import discover_repository
 
 from oldspeak import settings
 
 root_node = Node(settings.OLDSPEAK_DATADIR)
 repo = Repository('pygit2/.git')
+
+
+class BlobNotFound(Exception):
+    pass
 
 
 class Bucket(object):
@@ -24,9 +30,18 @@ class Bucket(object):
         return None
 
     @property
+    def tree(self):
+        head = repo.get(repo.head.target)
+        return head.tree
+
+    @property
+    def repo_path(self):
+        return discover_repository(self.path)
+
+    @property
     def git(self):
         if not self.repo:
-            self.repo = Repository(self.path)
+            self.repo = Repository(self.repo_path)
 
         return self.repo
 
@@ -57,8 +72,33 @@ class Bucket(object):
         tree.insert(path, blob_id, pygit2.GIT_FILEMODE_BLOB)
         return tree.write()
 
-    def read_file(self, path, data):
-        return
+    def traverse_blobs(self, filter_callback=bool, tree=None):
+        tree = tree or self.tree
+        path = [tree.name]
+        for node in tree:
+            current_path = path + [node.name]
+
+            if node.type is pygit2.GIT_OBJ_BLOB:
+                blob_path = '/'.join(path + [node.name])
+                if not filter_callback(blob_path):
+                    continue
+
+                yield blob_path, node
+
+            elif node.type is pygit2.GIT_OBJ_TREE:
+                path.append(node.name)
+                for child in self.traverse_blobs(filter_callback, node):
+                    yield '/'.join(path + [child.name]), node
+
+        raise BlobNotFound('{name} not found in {tree}'.format(**locals()))
+
+    def read_file(self, path):
+        tree = self.tree
+        for blob_path, blob in self.traverse_blobs(lambda blob_path: blob_path == path):
+            if path == blob_path:
+                yield blob.data
+
+        raise BlobNotFound('{name} not found in {tree}'.format(**locals()))
 
 
 class System(Bucket):
@@ -67,6 +107,16 @@ class System(Bucket):
 
     def get_path(self):
         return '/'.join(filter(bool, ('system', self.child)))
+
+    def list_fingerprints(self):
+        return self.traverse_blobs(lambda path: path.startswith('known_fingerprints/'))
+
+    def add_fingerprint(self, fingerprint, email, parent_fingerprint, **kw):
+        self.write_file('known_fingerprints/{}'.format(fingerprint), json.dumps({
+            'email': email,
+            'parent_fingerprint': parent_fingerprint,
+        }))
+        self.save(**kw)
 
 
 class Member(Bucket):
@@ -77,4 +127,4 @@ class Member(Bucket):
         self.fingerprint = fingerprint
 
     def get_path(self):
-        return '/'.join(filter(bool, ('fingerprint', self.fingerprint)))
+        return '/'.join(('fingerprint', self.fingerprint))
