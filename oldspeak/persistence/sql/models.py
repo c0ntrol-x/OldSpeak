@@ -5,19 +5,19 @@ import bcrypt
 
 import sqlalchemy as db
 
-from oldspeak.persistence.backends.sql import (
-    Model,
-    metadata,
-    PrimaryKey,
-    DefaultForeignKey,
-)
 from oldspeak.core import get_logger
 from oldspeak.lib.functions import now
 
 # from oldspeak.persistence.exceptions import UserSignupError
 
-from .helpers import UserRedisHelper
-# from .helpers import UserSecretsHelper
+from .mapper import (
+    Model,
+    metadata,
+    PrimaryKey,
+    # DefaultForeignKey,
+)
+from .redis_helpers import UserRedisHelper
+# from .redis_helpers import UserSecretsHelper
 
 logger = get_logger(__name__)
 

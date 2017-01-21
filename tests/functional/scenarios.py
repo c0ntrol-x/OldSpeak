@@ -56,6 +56,15 @@ def cleanup_sql(context):
     metadata.drop_all(bind=context.db.engine)
 
 
+def prepare_storage(context):
+    pass
+
+
+def cleanup_storage(context):
+    pass
+
+
+storage_scenario = scenario([prepare_storage], [cleanup_storage])
 web_scenario = scenario([prepare_sql, prepare_server], [cleanup_server, cleanup_sql])
 sql_scenario = scenario(prepare_sql, cleanup_sql)
 api_admin_scenario = scenario([prepare_sql, prepare_server, prepare_admin_scenario], [cleanup_server, cleanup_sql])

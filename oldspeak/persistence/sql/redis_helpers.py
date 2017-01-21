@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
 import re
 import bcrypt
-import random
 from collections import OrderedDict
 # from sqlalchemy import or_, and_
 from oldspeak import settings
@@ -15,7 +13,7 @@ from oldspeak.persistence.connectors import redis
 from oldspeak.persistence.meta import helpers
 # from oldspeak.persistence.exceptions import MissingPersonalInfo
 
-logger = get_logger('oldspeak.api.models')
+logger = get_logger('oldspeak.persistence.helpers')
 
 
 _HELPER_REGISTRY = OrderedDict()
