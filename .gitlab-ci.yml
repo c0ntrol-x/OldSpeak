@@ -1,0 +1,7 @@
+test:
+  script:
+  # this configures Django application to use attached postgres database that is run on `postgres` host
+  - apt-get update -qy
+  - apt-get install -y python-dev python-pip libffi-dev libssl-dev libgcrypt11-dev libudev-dev libev-dev libnss3 libgpg-error-dev libgpgme11-dev libgit2-dev build-essential
+  - pip install -r development.txt
+  - make test
