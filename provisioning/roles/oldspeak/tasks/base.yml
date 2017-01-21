@@ -72,15 +72,17 @@
     - libgpgme11-dev
     - libgit2-dev
 
-- name: copy backend app
-  synchronize: src="{{ local_repository_root_path }}" dest="/srv/src" recursive=yes
-  notify: restart python-app
+- name: ensure we have the most updated version of the software from git
+  git: repo=git@github.com:0rbitAeolian/OldSpeak.git
+    dest=/srv/src
+    version=master
+    accept_hostkey=yes
+    key_file={{ ssh_private_path }}
+# - name: copy docs homepage
+#   shell: rsync -putavozl /srv/src/docs/build/ /srv/open-source/oldspeak/
 
-- name: copy docs homepage
-  shell: rsync -putavozl /srv/src/docs/build/ /srv/open-source/oldspeak/
-
-- name: copy git repo
-  shell: rsync -putavozl /srv/src/.git/ /srv/open-source/oldspeak.git/
+# - name: copy git repo
+#   shell: rsync -putavozl /srv/src/.git/ /srv/open-source/oldspeak.git/
 
 # Python dependencies
 
