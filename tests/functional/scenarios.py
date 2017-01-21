@@ -3,7 +3,7 @@
 
 from sure import scenario
 from oldspeak.persistence import connectors
-from oldspeak.persistence.backends.sql import metadata, orm
+from oldspeak.persistence.sql.mapper import metadata, orm
 from oldspeak.http.server import Application
 from oldspeak.lib.clients import OldSpeakClient
 from oldspeak.lib.networking import get_free_tcp_port

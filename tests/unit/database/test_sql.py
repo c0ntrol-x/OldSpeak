@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 
 import sqlalchemy as db
 
-from oldspeak.persistence.backends.sql import (
+from oldspeak.persistence.sql.mapper import (
     Model,
     PrimaryKey,
     # DefaultForeignKey,
 )
-from oldspeak.persistence.helpers import (
+from oldspeak.persistence.sql.redis_helpers import (
     ModelHelper,
 )
 

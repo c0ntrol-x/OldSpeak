@@ -57,10 +57,16 @@ clean:
 	$(call ui.ok)
 
 smoke:
-	python -c 'from oldspeak import core'
-	python -c 'from oldspeak import http'
-	python -c 'from oldspeak.persistence import helpers'
-	python -c 'from oldspeak.persistence import models'
+	python -c 'from oldspeak.persistence.redis import *'
+	python -c 'from oldspeak.persistence.sql import *'
+	python -c 'from oldspeak.persistence.vfs import *'
+	python -c 'from oldspeak.console.parsers import *'
+	python -c 'from oldspeak.http.endpoints import *'
+	python -c 'from oldspeak.persistence import *'
+	python -c 'from oldspeak.console import *'
+	python -c 'from oldspeak.http import *'
+	python -c 'from oldspeak.lib import *'
+	python -c 'from oldspeak import *'
 
 unit: smoke
 	nosetests --rednose --cover-erase tests/unit

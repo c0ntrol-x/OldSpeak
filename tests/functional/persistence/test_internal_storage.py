@@ -4,5 +4,5 @@ from tests.functional.scenarios import storage_scenario
 
 
 @storage_scenario
-def test_list_known_fingerprints():
+def test_list_known_fingerprints(context):
     pass

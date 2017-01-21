@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from oldspeak.persistence.models import User
+from oldspeak.persistence.sql.models import User
 from tests.functional.scenarios import sql_scenario
 
 
