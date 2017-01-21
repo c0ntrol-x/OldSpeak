@@ -23,6 +23,15 @@
     - /srv/log
     - /srv/src
 
+- name: "www-data owner of /srv/src/static"
+  shell: chown -R www-data:oldspeak-services /srv/src/static
+
+- name: "fix permissions of static dirs"
+  shell: find /srv/src/static -type d -exec chmod 755 {} \;
+
+- name: "fix permissions of static files"
+  shell: find /srv/src/static -type f -exec chmod 644 {} \;
+
 - name: restart application
   service: name=python-app state=restarted
 

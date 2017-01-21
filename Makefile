@@ -136,4 +136,3 @@ quickie: deploy
 	@say 'done!'
 	@say 'done and done'
 	@echo "opening https://r131733.xyz"
-	@open https://r131733.xyz

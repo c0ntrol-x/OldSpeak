@@ -1,15 +1,36 @@
+# GENERAL
+# -------
+
 app_name: oldspeak
 venv_path: /srv/venv
-frontend_static_path: /srv/src/static/dist
-# "application_env" is in the vault
 
-#  each upload can take up to 10 minutes
-gunicorn_timeout: 600
-total_web_workers: 8
+# GUNICORN
+# --------
+gunicorn_timeout: 5  # timeout per request
+total_web_workers: 16  # gunicorn workers
+
+# PYTHON RUNTIME
+# --------------
 oldspeak_http_host: 127.0.0.1
 oldspeak_http_port: 1984
+
+# SSH KEYS
+# --------
 ssh_private_path: /srv/ssh/id_rsa
 ssh_public_path: /srv/ssh/id_rsa.pub
+
+# SSL CERTS
+# --------
 root_domain_tls_cert_path:  /etc/ssl/certs/r131733.xyz.cert
 root_domain_tls_key_path:  /etc/ssl/certs/r131733.xyz.key
 root_domain_ca_bundle_path:  /etc/ssl/certs/r131733.xyz.ca-bundle.cert
+
+# the sensitive variables in the vault:
+# -> root_domain
+# -> application_env
+# -> ssl_csr
+# -> ssl_key
+# -> ssl_cert
+# -> ssl_ca_bundle
+# -> ssh_private
+# -> ssh_public
