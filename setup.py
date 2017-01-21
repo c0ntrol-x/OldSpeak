@@ -51,7 +51,7 @@ setup(
     },
     author=u"Ð4√¡η¢Ч",
     author_email='d4v1ncy@protonmail.ch',
-    url=u'https://r131733.xyz/c/oldspeak',
+    url=u'https://github.com/0rbitAeolian/OldSpeak',
     packages=find_packages(exclude=['*tests*']),
     install_requires=dependencies,
     include_package_data=True,

@@ -45,7 +45,7 @@
     home=/srv/run
 
 - name: "creating folders"
-  file: path={{ item }} state=directory recurse=yes owner=oldspeak group=oldspeak mode=0770
+  file: path={{ item }} state=directory recurse=yes owner=oldspeak group=oldspeak mode=0775
   with_items:
     - /srv/ssh
     - /srv/log
@@ -79,11 +79,12 @@
     version=master
     accept_hostkey=yes
     key_file={{ ssh_private_path }}
-# - name: copy docs homepage
-#   shell: rsync -putavozl /srv/src/docs/build/ /srv/open-source/oldspeak/
 
-# - name: copy git repo
-#   shell: rsync -putavozl /srv/src/.git/ /srv/open-source/oldspeak.git/
+- name: copy docs homepage
+  shell: rsync -putavozl /srv/src/docs/build/ /srv/open-source/oldspeak/
+
+- name: copy git repo
+  shell: rsync -putavozl /srv/src/.git/ /srv/open-source/oldspeak.git/
 
 # Python dependencies
 
