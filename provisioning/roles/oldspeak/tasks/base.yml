@@ -75,6 +75,7 @@
 - name: ensure we have the most updated version of the software from git
   git: repo=git@github.com:0rbitAeolian/OldSpeak.git
     dest=/srv/src
+    force=yes
     version=master
     accept_hostkey=yes
     key_file={{ ssh_private_path }}
