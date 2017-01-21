@@ -10,3 +10,6 @@ oldspeak_http_host: 127.0.0.1
 oldspeak_http_port: 1984
 ssh_private_path: /srv/ssh/id_rsa
 ssh_public_path: /srv/ssh/id_rsa.pub
+root_domain_tls_cert_path:  /etc/ssl/certs/r131733.xyz.cert
+root_domain_tls_key_path:  /etc/ssl/certs/r131733.xyz.key
+root_domain_ca_bundle_path:  /etc/ssl/certs/r131733.xyz.ca-bundle.cert

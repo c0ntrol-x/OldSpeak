@@ -132,7 +132,7 @@ vault-edit:;	@ansible-vault edit provisioning/oldspeak-vault.yml
 deploy:;	@ansible-playbook -i provisioning/inventory provisioning/site.yml
 provision:	deps pythonpath static html-docs deploy
 
-quickie: html-docs static deploy
+quickie: deploy
 	@say 'done!'
 	@say 'done and done'
 	@echo "opening https://r131733.xyz"
