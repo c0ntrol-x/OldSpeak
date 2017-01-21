@@ -47,6 +47,7 @@
 - name: "creating folders"
   file: path={{ item }} state=directory recurse=yes owner=oldspeak group=oldspeak mode=0770
   with_items:
+    - /srv/ssh
     - /srv/log
     - /srv/log/nginx
     - /srv/mail

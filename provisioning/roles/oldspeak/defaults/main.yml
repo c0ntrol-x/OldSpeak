@@ -8,3 +8,5 @@ gunicorn_timeout: 600
 total_web_workers: 8
 oldspeak_http_host: 127.0.0.1
 oldspeak_http_port: 1984
+ssh_private_path: /srv/ssh/id_rsa
+ssh_public_path: /srv/ssh/id_rsa.pub

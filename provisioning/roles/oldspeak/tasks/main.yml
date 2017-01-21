@@ -12,6 +12,7 @@
     - /srv/mail
     - /srv/uploads
     - /srv/.data
+    - /srv/ssh
     - /srv/open-source
 
 - name: "ensure service-wide group permissions"
