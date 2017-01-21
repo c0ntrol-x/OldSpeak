@@ -4,7 +4,7 @@ Source Code Access
 Git Repository
 --------------
 
-`https://r131733.xyz/c/oldspeak.git`_
+https://github.com/0rbitAeolian/OldSpeak
 
 
 System Dependencies
@@ -37,7 +37,7 @@ Example
    sudo sed '/oldspeak/d' /etc/hosts
    sudo echo -e "\n127.0.0.1\toldspeak" >> /etc/hosts
    pip install virtualenv
-   git clone https://r131733.xyz/c/oldspeak.git
+   git clone git@github.com:0rbitAeolian/OldSpeak.git
    cd oldspeak
    virtualenv venv
    source venv/bin/activate
