@@ -2,6 +2,7 @@ OldSpeak
 ========
 
 .. image:: docs/source/_static/logo.png
+   :scale: 30 %
 
 
 Git Repository
