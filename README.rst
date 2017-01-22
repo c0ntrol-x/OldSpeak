@@ -50,5 +50,8 @@ Example
    make web
 
 
-.. tip:: If everything worked fine, you should be able to access
-          `http://oldspeak:1984` and play along.
+Test
+----
+
+If everything worked fine, you should be able to access
+`http://oldspeak:1984`_ and play along.
