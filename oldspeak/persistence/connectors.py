@@ -33,8 +33,10 @@ class RedisConnector(base_connector):
 
     def create_pool(self, alias=None):
         url = settings.get_redis_url(alias)
-        pool = RedisPool.from_url(url, max_connections=settings.CONNECTION_POOL_SIZE)
+        pool = RedisPool.from_url(
+            url, max_connections=settings.CONNECTION_POOL_SIZE)
 
+        return pool
 
     def create_connection(self, alias=None):
         return StrictRedis(connection_pool=self.get_pool(alias))
