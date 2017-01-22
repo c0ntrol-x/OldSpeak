@@ -8,7 +8,6 @@ envelop==0.2.0
 gevent==1.2.1
 mysql-python==1.2.5
 plant==0.1.2
-plant==0.1.2
 pycrypto==2.6.1
 pygpgme==0.3
 pyqrcode==1.2.1

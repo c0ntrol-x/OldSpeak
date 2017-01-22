@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 
 class JohnDoe:
+    name = 'John Doe'
     email = 'john@doe.com'
     fingerprint = '9FF44C58C3F0456CCD41F4EE876863BB2759DF55'
     public_key = '''-----BEGIN PGP PUBLIC KEY BLOCK-----

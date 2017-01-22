@@ -72,6 +72,9 @@ SECRET_KEY = env.get("SECRET_KEY")
 
 # Gevent/Concurrency
 
+VFS_PERSISTENCE_USER = 'oldspeak service'
+VFS_PERSISTENCE_EMAIL = 'service@oldspeak'
+
 GEVENT_MAX_CONNECTIONS = 1024 * 32
 
 API_TOKEN_EXPIRATION_TIME = 60 * 60 * 12  # 12 hours in seconds

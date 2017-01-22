@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import os
+import shutil
 from sure import scenario
+from datetime import datetime
+from oldspeak import settings
 from oldspeak.persistence import connectors
 from oldspeak.persistence.sql.mapper import metadata, orm
 from oldspeak.http.server import Application
@@ -57,10 +60,16 @@ def cleanup_sql(context):
 
 
 def prepare_storage(context):
-    pass
+    target = settings.OLDSPEAK_DATADIR
+    if os.path.isdir(target):
+        shutil.rmtree(target)
+
+    os.makedirs(target)
 
 
 def cleanup_storage(context):
+    utcnow = datetime.utcnow()
+    shutil.move(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
     pass
 
 
