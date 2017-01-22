@@ -52,7 +52,8 @@
     - /srv/log/nginx
     - /srv/mail
     - /srv/uploads
-    - /srv/.data
+    - /srv/private-data
+    - /srv/public-data
     - /srv/run
     - /srv/open-source
 

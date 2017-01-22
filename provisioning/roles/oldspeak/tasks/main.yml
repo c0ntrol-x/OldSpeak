@@ -8,20 +8,22 @@
   shell: chown -R oldspeak:oldspeak-services "{{ item }}"
   with_items:
     - /srv
-    - /srv/src
     - /srv/mail
-    - /srv/uploads
-    - /srv/.data
-    - /srv/ssh
     - /srv/open-source
+    - /srv/private-data
+    - /srv/public-data
+    - /srv/src
+    - /srv/ssh
+    - /srv/uploads
 
 - name: "ensure service-wide group permissions"
   shell: chown -R oldspeak:oldspeak-services "{{ item }}"
   with_items:
-    - /srv/src/static
-    - /srv/open-source
     - /srv/log
+    - /srv/open-source
+    - /srv/public-data
     - /srv/src
+    - /srv/src/static
 
 - name: "www-data owner of /srv/src/static"
   shell: chown -R www-data:oldspeak-services /srv/src/static

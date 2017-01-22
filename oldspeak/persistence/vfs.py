@@ -58,7 +58,7 @@ class GitRepository(object):
         if self.git.head_is_unborn:
             return None
 
-        return self.git.get(self.git.head.target)
+        return self.git.head.get_object()
 
     @property
     def tree(self):
@@ -99,35 +99,36 @@ class GitRepository(object):
         raise BlobNotFound('{name} not found in {tree}'.format(**locals()))
 
     def create_subtrees(self, tree, *names):
-        ancestry = []
-        parent = tree
+        root = tree
+        ancestry = [root]
 
         for name in names:
+            parent = tree
             tree = self.new_tree()
+            ancestry.append(tree)
             parent.insert(
                 name,
                 tree.write(),
                 pygit2.GIT_FILEMODE_TREE
             )
             parent.write()
-            ancestry.append(parent)
-            parent = tree
 
-        return tree, ancestry
+        return root, tree, ancestry
 
     def write_file(self, path, data, tree=None):
         subdirs = filter(bool, os.path.split(os.path.dirname(path)))
-        tree = tree or self.new_tree()
+        root = tree = tree or self.new_tree()
 
         if subdirs:
             filename = os.path.basename(path)
-            tree, ancestry = self.create_subtrees(tree, *subdirs)
+            root, tree, ancestry = self.create_subtrees(tree, *subdirs)
         else:
             filename = path
 
         blob_id = self.git.create_blob(data)
         tree.insert(filename, blob_id, pygit2.GIT_FILEMODE_BLOB)
-        return tree, blob_id
+        tree.write()
+        return root, tree, blob_id
 
     @property
     def name(self):
@@ -146,17 +147,17 @@ class GitRepository(object):
 
         parents = []
 
-        tree = tree or self.tree or self.new_tree()
-        if not tree:
-            tree, blob_id = self.write_file('README', "\n".join([self.name, '\n', message]), tree=tree)
+        tree = tree or self.tree
+
+        if self.git.head_is_unborn and len(tree) == 0:
+            root, tree, blob_id = self.write_file('README', "\n".join([self.name, '\n', message]), tree=tree)
+        elif not self.git.head_is_unborn:
+            parents.append(self.git.head.target)
 
         if isinstance(tree, pygit2.Tree):
             tree_id = tree.id
         else:
             tree_id = tree.write()
-
-        if not self.git.head_is_unborn:
-            parents.append(self.git.head.target)
 
         sha = self.git.create_commit(
             reference_name,
@@ -179,27 +180,33 @@ class Bucket(object):
         self.new(path, *args, **kw)
         self.path = path or self.get_path()
         self.repo = GitRepository(self.path, settings.OLDSPEAK_DATADIR)
-        self.tree = None or self.repo.new_tree()
+
         self.author_name = author_name
         self.author_email = author_email
         self.changes = OrderedDict()
 
+        self.tree = self.repo.tree
+
     def write_file(self, name, data):
-        tree, blob_id = self.repo.write_file(name, data, tree=self.tree)
+        self.tree, tree, blob_id = self.repo.write_file(name, data, tree=self.tree)
         self.changes[name] = ':'.join(['bucket', self.__class__.__name__, 'file'])
         blob = self.repo.git.get(blob_id)
-        return blob, tree
+        return blob
 
-    def save(self, author_name=None, author_email=None, tree=None):
-        tree = tree or self.tree
+    def save(self, author_name=None, author_email=None, tree=None, message=None):
+        tree = tree or self.tree or self.repo.new_tree()
         author_name = author_name or self.author_name
         author_email = author_email or self.author_email
-        message = ' '.join([
+        message = message or ' '.join([
             ':'.join(['bucket', self.__class__.__name__]),
             self.path,
         ])
 
-        tree.write()
+        if not tree:
+            return
+        else:
+            tree.write()
+
         commit = self.repo.commit(
             author_name=author_name,
             author_email=author_email,
@@ -207,6 +214,9 @@ class Bucket(object):
             tree=tree,
         )
         return commit
+
+    def resolve(self, oid):
+        return self.repo.git.get(oid)
 
     def new(self, *args, **kw):
         pass
@@ -223,7 +233,7 @@ class System(Bucket):
         return self.repo.traverse_blobs(lambda path: path.startswith('known_fingerprints/'))
 
     def add_fingerprint(self, fingerprint, email, parent_fingerprint, **kw):
-        tree, blob_id = self.repo.write_file('fingerprints/{}.json'.format(fingerprint), json.dumps({
+        root, tree, blob_id = self.repo.write_file('fingerprints/{}.json'.format(fingerprint), json.dumps({
             'email': email,
             'parent_fingerprint': parent_fingerprint,
         }, indent=4))

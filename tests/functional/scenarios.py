@@ -69,8 +69,7 @@ def prepare_storage(context):
 
 def cleanup_storage(context):
     utcnow = datetime.utcnow()
-    shutil.move(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
-    pass
+    shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
 
 
 storage_scenario = scenario([prepare_storage], [cleanup_storage])

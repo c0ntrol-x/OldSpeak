@@ -27,7 +27,8 @@ PORT = env.get_int('PORT', LOCAL_PORT)
 
 TEST_MODE = env.get('TEST_MODE', 'false')
 OLDSPEAK_WORKDIR = env.get('OLDSPEAK_WORKDIR', '/srv/oldspeak/sandbox')
-OLDSPEAK_DATADIR = env.get('OLDSPEAK_DATADIR', '/srv/oldspeak/.data')
+OLDSPEAK_DATADIR = env.get('OLDSPEAK_DATADIR', '/srv/oldspeak/private-data')
+OLDSPEAK_PUBLICDIR = env.get('OLDSPEAK_PUBLICDIR', '/srv/oldspeak/public-data')
 STATIC_FOLDER_PATH = env.get('OLDSPEAK_STATIC_FOLDER_PATH', project_file('static', 'dist'))
 HTML_TEMPLATE_PATH = env.get('OLDSPEAK_HTML_TEMPLATE_PATH', project_file('static', 'templates'))
 STATIC_URL_PREFIX = '/s'
