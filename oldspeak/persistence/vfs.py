@@ -117,6 +117,9 @@ class GitRepository(object):
 
     def write_file(self, path, data, tree=None):
         subdirs = filter(bool, os.path.split(os.path.dirname(path)))
+        if isinstance(tree, pygit2.Tree):
+            tree = self.new_tree()
+
         root = tree = tree or self.new_tree()
 
         if subdirs:
@@ -126,6 +129,7 @@ class GitRepository(object):
             filename = path
 
         blob_id = self.git.create_blob(data)
+
         tree.insert(filename, blob_id, pygit2.GIT_FILEMODE_BLOB)
         tree.write()
         return root, tree, blob_id
@@ -153,6 +157,7 @@ class GitRepository(object):
             root, tree, blob_id = self.write_file('README', "\n".join([self.name, '\n', message]), tree=tree)
         elif not self.git.head_is_unborn:
             parents.append(self.git.head.target)
+            reference_name = reference_name or 'refs/heads/master'
 
         if isinstance(tree, pygit2.Tree):
             tree_id = tree.id
@@ -169,9 +174,7 @@ class GitRepository(object):
         )
 
         commit = self.git.get(sha)
-        if self.git.head_is_unborn:
-            self.git.create_branch('master', commit)
-
+        self.git.reset(sha, pygit2.GIT_RESET_HARD)
         return commit
 
 

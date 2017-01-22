@@ -60,16 +60,18 @@ def cleanup_sql(context):
 
 
 def prepare_storage(context):
-    target = settings.OLDSPEAK_DATADIR
-    if os.path.isdir(target):
-        shutil.rmtree(target)
+    # target = settings.OLDSPEAK_DATADIR
+    # if os.path.isdir(target):
+    #     shutil.rmtree(target)
 
-    os.makedirs(target)
+    # os.makedirs(target)
+    pass
 
 
 def cleanup_storage(context):
-    utcnow = datetime.utcnow()
-    shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
+    # utcnow = datetime.utcnow()
+    # shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
+    pass
 
 
 storage_scenario = scenario([prepare_storage], [cleanup_storage])
