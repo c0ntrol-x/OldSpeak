@@ -5,3 +5,6 @@ test:
   - apt-get install -y python-dev python-pip libffi-dev libssl-dev libgpgme11-dev libgit2-dev make
   - pip install -r development.txt
   - make test
+
+  variables:
+    PYTHONSTARTUP: .startup.py
