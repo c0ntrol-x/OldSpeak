@@ -25,6 +25,19 @@ System Dependencies
    libgit2
 
 
+Installing on Mac OSX
+~~~~~~~~~~~~~~~~~~~~~
+
+**on your terminal**:
+
+::
+
+   brew install python gpgme libgit2 coreutils nodebrew
+   nodebrew install-binary v6.9.4
+   nodebrew use v6.9.4
+   nodebrew alias default v6.9.4
+
+
 Service Dependencies
 --------------------
 
@@ -66,8 +79,7 @@ For example, mine looks like this:
 Full Example
 ------------
 
-paste the lines below on your terminal
-
+**on your terminal**:
 
 .. code:: bash
 
