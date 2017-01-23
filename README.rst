@@ -32,18 +32,11 @@ Installing on Mac OSX
 
 ::
 
-   brew install python gpgme libgit2 coreutils nodebrew
+   brew install python gpgme libgit2 coreutils nodebrew redis
    nodebrew install-binary v6.9.4
    nodebrew use v6.9.4
    nodebrew alias default v6.9.4
-
-
-Service Dependencies
---------------------
-
-::
-
-   Redis Server >= 3.2.6
+   
 
 
 Edit your ``/etc/hosts`` file
