@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import sys
 import logging
 import argparse
 import warnings
 
-from oldspeak.console.base import get_logo
 from oldspeak.console.base import get_main_parser_argv
 from oldspeak.console.base import execute_command_version
 from oldspeak.console.web import execute_command_webserver
@@ -29,8 +27,6 @@ def entrypoint():
 
     argv = get_main_parser_argv()
     args = parser.parse_args(argv)
-
-    sys.stderr.write(get_logo())
 
     if args.command not in handlers:
         parser.print_help()

@@ -10,12 +10,13 @@ import gevent.monkey
 from oldspeak.version import version
 
 
-LOGO = '''
+LOGO = '''\n
 \033[1;30m  _ \  |     __ \ \033[0;32m   ___|   _ \  ____|    \    |  /
 \033[1;30m |   | |     |   |\033[0;32m \___ \  |   | __|     _ \   | /
 \033[1;30m |   | |     |   |\033[0;32m       | ___/  |      ___ \  |/
 \033[1;30m\___/ _____|____/ \033[0;32m _____/ _|    _____|_/    _\_|\_\n
-\033[0m\n'''.strip()
+\033[0;34m{0}\033[0m\n\n
+\033[0m'''
 
 
 def bootstrap_conf_with_gevent(args, loglevel=logging.DEBUG):
@@ -44,12 +45,17 @@ def execute_command_version():
     if args.json:
         print json.dumps({'version': version, 'name': 'OldSpeak'}, indent=2)
     else:
-        print "oldspeak", 'v{0}'.format(version)
+        print get_logo('v{0}'.format(version))
 
 
-def get_logo():
+def get_logo(*lines):
     if 'LOGO' in os.environ:
         return ''
 
     os.environ['LOGO'] = LOGO
-    return LOGO
+    return LOGO.format('\n'.join(lines))
+
+
+def show_logo(*lines):
+    sys.stderr.write(get_logo(*lines))
+    sys.stderr.flush()

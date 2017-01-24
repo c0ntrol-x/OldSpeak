@@ -2,7 +2,6 @@ OldSpeak
 ========
 
 .. image:: docs/source/_static/logo.png
-   :scale: 30 %
 
 
 Git Repository
@@ -36,7 +35,7 @@ Installing on Mac OSX
    nodebrew install-binary v6.9.4
    nodebrew use v6.9.4
    nodebrew alias default v6.9.4
-   
+
 
 
 Edit your ``/etc/hosts`` file
@@ -96,6 +95,9 @@ Full Example
 
    # 6. run the local http python server
    make web
+
+
+.. image:: docs/source/_static/screenshot1.png
 
 
 Test

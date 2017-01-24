@@ -55,7 +55,7 @@ class Application(Flask):
     def run(self, **kw):
         kw['host'] = kw.pop('host', self.host)
         kw['port'] = kw.pop('port', self.port)
-        kw['debug'] = kw.pop('debug', True)
+        kw['debug'] = kw.pop('debug', False)
         kw['use_evalex'] = kw.pop('use_evalex', False)
         kw['use_reloader'] = kw.pop('use_reloader', True)
         return super(Application, self).run(**kw)

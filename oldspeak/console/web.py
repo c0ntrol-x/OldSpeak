@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from oldspeak.http.server import Application
 from oldspeak.console.base import get_sub_parser_argv
 from oldspeak.lib.logs import configure_logging
+from oldspeak.console.base import show_logo
 
 
 def execute_command_webserver():
@@ -13,6 +14,7 @@ def execute_command_webserver():
 
     configure_logging(args.loglevel)
 
+    show_logo('local web server')
     try:
         server.run()
 
