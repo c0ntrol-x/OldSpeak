@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import os
 import sys
 import json
 import logging
@@ -45,3 +45,11 @@ def execute_command_version():
         print json.dumps({'version': version, 'name': 'OldSpeak'}, indent=2)
     else:
         print "oldspeak", 'v{0}'.format(version)
+
+
+def get_logo():
+    if 'LOGO' in os.environ:
+        return ''
+
+    os.environ['LOGO'] = LOGO
+    return LOGO

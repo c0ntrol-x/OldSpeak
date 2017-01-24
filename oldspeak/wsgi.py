@@ -7,7 +7,7 @@ from oldspeak.http.endpoints.api import *
 
 server = Application(
     # always use 127.0.0.1 in production
-    host='127.0.0.1',
+    host='oldspeak',
     port=os.environ['PORT'],
     ssl=True,
 )

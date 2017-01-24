@@ -45,8 +45,7 @@ setup(
     ]),
     entry_points={
         'console_scripts': [
-            'oldspeak = oldspeak.co.main:entrypoint',
-            'ctrlx.social = oldspeak.co.main:entrypoint',
+            'oldspeak = oldspeak.console.main:entrypoint',
         ],
     },
     author=u"Ð4√¡η¢Ч",

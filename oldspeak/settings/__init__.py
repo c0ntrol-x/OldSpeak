@@ -53,10 +53,10 @@ ENVIRONMENT = {
 DEBUG = env.get_bool('DEBUG')
 
 # HTTP
-HOST = env.get("HOST") or '127.0.0.1'
-DOMAIN = env.get("DOMAIN") or 'localhost:{0}'.format(PORT)
+HOST = env.get("HOST") or 'oldspeak'
+DOMAIN = env.get("DOMAIN") or '{HOST}:{PORT}'.format(**locals())
 SCHEME = env.get('SCHEME') or (
-    'localhost' not in DOMAIN and 'https://' or 'http://')
+    'oldspeak' not in DOMAIN and 'https://' or 'http://')
 LOG_LEVEL_NAME = (env.get('LOG_LEVEL') or 'INFO').upper()
 
 # Database-related
