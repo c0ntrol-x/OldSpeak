@@ -2,10 +2,9 @@
 import os
 import json
 import pygit2
-import hashlib
 from collections import OrderedDict
 from pygit2 import Repository
-from pygit2 import GitError
+# from pygit2 import GitError
 from pygit2 import init_repository
 from pygit2 import discover_repository
 
@@ -20,6 +19,8 @@ class GitRepository(object):
     def __init__(self, path, root_dir=None):
         self.relative_path = path
         self.root_dir = root_dir or "."
+        self._current_tree = None
+        self.commit_cache = []
 
     @property
     def path(self):
@@ -62,77 +63,87 @@ class GitRepository(object):
 
     @property
     def tree(self):
-        if not self.head:
-            return None
+        if self._current_tree:
+            return self._current_tree
+        elif self.head:
+            self._current_tree = self.new_tree(self.head.tree.id)
+        else:
+            self._current_tree = self.new_tree()
 
-        return self.head.tree
+        return self._current_tree
 
-    def new_tree(self):
-        return self.git.TreeBuilder()
+    def new_tree(self, *args, **kw):
+        return self.git.TreeBuilder(*args, **kw)
 
-    def traverse_blobs(self, tree=None, filter_callback=bool):
-        tree = tree or self.tree
-        path = [tree.name]
-        for node in tree:
-            current_path = path + [node.name]
+    def traverse_blobs(self, tree=None):
+        if not tree and not self.head and not self.tree:
+            raise StopIteration
 
-            if node.type is pygit2.GIT_OBJ_BLOB:
-                blob_path = '/'.join(path + [node.name])
-                if not filter_callback(blob_path):
-                    continue
+        elif self.tree:
+            tree = self.tree
 
-                yield blob_path, node
+        elif not tree:
+            tree = self.head.tree
 
-            elif node.type is pygit2.GIT_OBJ_TREE:
-                path.append(node.name)
-                for child in self.traverse_blobs(filter_callback, node):
-                    yield '/'.join(path + [child.name]), node
+        elif tree.type == 'blob':
+            entry = tree
+            node = self.git.get(entry.hex)
+            yield entry.name, OrderedDict([
+                (b'type', entry.type),
+                (b'size', node.size),
+                (b'is_binary', node.is_binary),
+            ])
+        else:
 
-        raise BlobNotFound('{name} not found in {tree}'.format(**locals()))
+            for entry in tree:
+                node = self.git.get(entry.hex)
+                if entry.type == 'blob':
+                    yield entry.name, OrderedDict([
+                        (b'type', entry.type),
+                        (b'size', node.size),
+                        (b'is_binary', node.is_binary),
+                    ])
 
-    def read_file(self, path):
-        tree = self.tree
-        for blob_path, blob in self.traverse_blobs(lambda blob_path: blob_path == path):
-            if path == blob_path:
-                yield blob.data
+                elif entry.type == 'tree':
+                    yield entry.name, OrderedDict([
+                        (b'type', entry.type),
+                        (b'size', len(node)),
+                    ])
+                    for key, value in self.traverse_blobs(entry):
+                        yield key, value
 
-        raise BlobNotFound('{name} not found in {tree}'.format(**locals()))
+    def __iter__(self):
+        for k, v in self.traverse_blobs(self.head.tree):
+            yield k, v
 
-    def create_subtrees(self, tree, *names):
-        root = tree
-        ancestry = [root]
+    def auto_write_file(self, path, thing, treebuilder, mode):
+        repo = self.git
+        path_parts = path.split('/', 1)
+        if len(path_parts) == 1:  # base case
+            treebuilder.insert(path, thing, mode)
+            return treebuilder.write()
 
-        for name in names:
-            parent = tree
-            tree = self.new_tree()
-            ancestry.append(tree)
-            parent.insert(
-                name,
-                tree.write(),
-                pygit2.GIT_FILEMODE_TREE
-            )
-            parent.write()
+        subtree_name, sub_path = path_parts
+        tree_oid = treebuilder.write()
+        tree = repo.get(tree_oid)
+        try:
+            entry = tree[subtree_name]
+            existing_subtree = repo.get(entry.hex)
+            sub_treebuilder = repo.TreeBuilder(existing_subtree)
+        except KeyError:
+            sub_treebuilder = repo.TreeBuilder()
 
-        return root, tree, ancestry
+        subtree_oid = self.auto_write_file(sub_path, thing, sub_treebuilder, mode)
+        treebuilder.insert(subtree_name, subtree_oid, pygit2.GIT_FILEMODE_TREE)
+        # builder.insert('commit.txt', oid, 0100644)
+
+        return treebuilder.write()
 
     def write_file(self, path, data, tree=None):
-        subdirs = filter(bool, os.path.split(os.path.dirname(path)))
-        if isinstance(tree, pygit2.Tree):
-            tree = self.new_tree()
-
-        root = tree = tree or self.new_tree()
-
-        if subdirs:
-            filename = os.path.basename(path)
-            root, tree, ancestry = self.create_subtrees(tree, *subdirs)
-        else:
-            filename = path
-
-        blob_id = self.git.create_blob(data)
-
-        tree.insert(filename, blob_id, pygit2.GIT_FILEMODE_BLOB)
-        tree.write()
-        return root, tree, blob_id
+        blob = self.git.create_blob(data)
+        tree_oid = self.auto_write_file(path, blob.hex, tree or self.tree, pygit2.GIT_FILEMODE_BLOB)
+        tree = self.git.get(tree_oid.hex)
+        return tree, self.git.get(blob.hex)
 
     @property
     def name(self):
@@ -147,22 +158,32 @@ class GitRepository(object):
         author_name = author_name or settings.VFS_PERSISTENCE_USER
         author_email = author_email or settings.VFS_PERSISTENCE_USER
         author = pygit2.Signature(author_name, author_email)
-        # tree = tree or self.tree
+        tree = tree or self.tree
 
         parents = []
 
-        tree = tree or self.tree
+        if isinstance(tree, pygit2.Tree):
+            tree = self.new_tree(tree.id)
+
+        # tree = tree or self.tree
+        tree_id = tree.write()
 
         if self.git.head_is_unborn and len(tree) == 0:
-            root, tree, blob_id = self.write_file('README', "\n".join([self.name, '\n', message]), tree=tree)
+            tree_id, blob_id = self.write_file('README', 'initial commit for {}'.format(self.name), tree=self.tree)
+
         elif not self.git.head_is_unborn:
             parents.append(self.git.head.target)
-            reference_name = reference_name or 'refs/heads/master'
 
-        if isinstance(tree, pygit2.Tree):
-            tree_id = tree.id
+        existing_refs = self.git.listall_references()
+
+        if not reference_name and len(existing_refs) == 1:
+            reference_name = existing_refs[0]
+
+        if reference_name:
+            reference = self.git.lookup_reference(reference_name)
         else:
-            tree_id = tree.write()
+            reference_name = 'refs/heads/master'
+            reference = None
 
         sha = self.git.create_commit(
             reference_name,
@@ -174,7 +195,15 @@ class GitRepository(object):
         )
 
         commit = self.git.get(sha)
+        # self.git.set_head(sha)
         self.git.reset(sha, pygit2.GIT_RESET_HARD)
+
+        if not reference:
+            reference = self.git.create_reference('refs/heads/master', sha, True)
+
+        self.git.head.set_target(reference.get_object().id)
+
+        self.commit_cache.append((sha, tree_id, parents))
         return commit
 
 
@@ -186,36 +215,21 @@ class Bucket(object):
 
         self.author_name = author_name
         self.author_email = author_email
-        self.changes = OrderedDict()
-
-        self.tree = self.repo.tree
 
     def write_file(self, name, data):
-        self.tree, tree, blob_id = self.repo.write_file(name, data, tree=self.tree)
-        self.changes[name] = ':'.join(['bucket', self.__class__.__name__, 'file'])
-        blob = self.repo.git.get(blob_id)
+        tree, blob = self.repo.write_file(name, data)
         return blob
 
-    def save(self, author_name=None, author_email=None, tree=None, message=None):
-        tree = tree or self.tree or self.repo.new_tree()
-        author_name = author_name or self.author_name
-        author_email = author_email or self.author_email
-        message = message or ' '.join([
-            ':'.join(['bucket', self.__class__.__name__]),
-            self.path,
-        ])
+    def save(self, message=None, author_name=None, author_email=None, **kw):
 
-        if not tree:
-            return
-        else:
-            tree.write()
+        kw = {}
+        if message:
+            kw['message'] = message
 
-        commit = self.repo.commit(
-            author_name=author_name,
-            author_email=author_email,
-            message=message,
-            tree=tree,
-        )
+        kw['author_name'] = author_name or self.author_name
+        kw['author_email'] = author_email or self.author_email
+
+        commit = self.repo.commit(**kw)
         return commit
 
     def resolve(self, oid):
@@ -223,6 +237,13 @@ class Bucket(object):
 
     def new(self, *args, **kw):
         pass
+
+    def list(self):
+        data = []
+        for patch in self.repo.head.tree.diff_to_tree():
+            data.append(patch.delta.new_file.path)
+
+        return data
 
 
 class System(Bucket):
@@ -232,16 +253,14 @@ class System(Bucket):
     def get_path(self):
         return '/'.join(filter(bool, ('system', self.child)))
 
-    def list_fingerprints(self):
-        return self.repo.traverse_blobs(lambda path: path.startswith('known_fingerprints/'))
-
     def add_fingerprint(self, fingerprint, email, parent_fingerprint, **kw):
-        root, tree, blob_id = self.repo.write_file('fingerprints/{}.json'.format(fingerprint), json.dumps({
+        tree, blob = self.repo.write_file('fingerprints/{}.json'.format(fingerprint), json.dumps({
             'email': email,
+            'fingerprint': fingerprint,
             'parent_fingerprint': parent_fingerprint,
         }, indent=4))
-        commit = self.repo.commit(tree=tree, reference_name='refs/heads/master')
-        return commit.id, tree.write(), blob_id
+        commit = self.repo.commit(tree=tree)
+        return commit, tree, blob
 
 
 class Member(Bucket):

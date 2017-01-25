@@ -18,16 +18,18 @@ def test_versioned_bucket(context):
         author_email=JohnDoe.email,
     )
 
-    blob1 = my_bucket.write_file(
+    my_bucket.write_file(
         'hello-world.md',
         '\n'.join([
             '# Hello World\n',
             'Today is an important day',
         ])
     )
+    commit = my_bucket.save('adding a hello-world markdown')
+    commit.should.be.a('_pygit2.Commit')
 
-    blob2 = my_bucket.write_file(
-        'oldspeak.md',
+    my_bucket.write_file(
+        'todo/oldspeak.md',
         '\n'.join([
             '# OldSpeak TO-DO list\n',
             '- add white-listed fingerprints',
@@ -39,11 +41,22 @@ def test_versioned_bucket(context):
             '  - whose value is the SHA1 auth token XORed with the fingerprint',
         ])
     )
-
-    commit = my_bucket.save()
+    commit = my_bucket.save('adding TO-DO list for oldspeak')
     commit.should.be.a('_pygit2.Commit')
 
-    [x.name for x in my_bucket.repo.tree].should.equal(['hello-world.md', 'oldspeak.md'])
+    my_bucket.write_file(
+        'todo/backlog.md',
+        '\n'.join([
+            '# Backlog\n',
+            '',
+            '- less important 1',
+            '- less important 2',
+        ])
+    )
+    commit = my_bucket.save('adding TO-DO list for backlog')
+    commit.should.be.a('_pygit2.Commit')
+
+    my_bucket.list().should.equal(['hello-world.md', 'todo/backlog.md', 'todo/oldspeak.md'])
 
 
 @storage_scenario
@@ -58,12 +71,9 @@ def test_core_system_storage(context):
 
     result.should.be.a(tuple)
     result.should.have.length_of(3)
-    commit_id, tree_id, blob_id = result
-
-    commit = system.repo.git.get(commit_id)
-    tree = system.repo.git.get(tree_id)
-    blob = system.repo.git.get(blob_id)
+    commit, tree, blob = result
 
     commit.should.be.a('_pygit2.Commit')
     tree.should.be.a('_pygit2.Tree')
     blob.should.be.a('_pygit2.Blob')
+    system.list().should.equal(['fingerprints/9FF44C58C3F0456CCD41F4EE876863BB2759DF55.json'])

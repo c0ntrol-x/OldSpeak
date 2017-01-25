@@ -77,6 +77,7 @@ functional:
 integration:
 	python -c 'import oldspeak.http'
 	python -c 'import oldspeak.persistence'
+	python tests/integration.py
 
 tests: unit functional integration
 
