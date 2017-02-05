@@ -3,7 +3,7 @@
     - oldspeak
 
   sudo: yes
-  user: root
+  user: d3pl0y
   vars:
     local_repository_root_path: "{{ playbook_dir }}/.."
 
@@ -19,5 +19,5 @@
 
   roles:
     - ulimit
-    - onion
+    # - onion
     - oldspeak
