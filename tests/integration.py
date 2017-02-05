@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
 from datetime import datetime
 
-from oldspeak import settings
 from oldspeak.persistence.vfs import Bucket
+from oldspeak.core import GPGKeyChain
 
-# if os.path.isdir(settings.OLDSPEAK_DATADIR):
-#     shutil.rmtree(settings.OLDSPEAK_DATADIR)
+DATADIR = os.path.join(os.path.abspath(os.getcwd()), 'integration-data')
 
-# os.makedirs(settings.OLDSPEAK_DATADIR)
+if os.path.isdir(DATADIR):
+    shutil.rmtree(DATADIR)
+
+os.makedirs(DATADIR)
 
 
 def random_file_contents():
@@ -26,3 +29,10 @@ os.system('/usr/local/bin/tree')
 os.system('/usr/local/bin/git branch')
 os.system('/usr/local/bin/git whatchanged')
 os.system('/usr/local/bin/git status')
+
+keychain = GPGKeyChain()
+keychain.generate_key(
+    'Mary Doe',
+    'mary@doe.com',
+    length=4096
+)

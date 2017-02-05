@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from tests.functional.scenarios import storage_scenario
-# from tests.functional.fixtures import JohnDoe
+from oldspeak.lib.clients import OldSpeakClient
+from tests.functional.scenarios import web_scenario
+from tests.functional.fixtures import JohnDoe
 
 
 # @web_scenario

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import os
-from glob import glob
+# import os
+# from glob import glob
 from tests.functional.fixtures import JohnDoe
 from tests.functional.scenarios import storage_scenario
 from oldspeak.persistence.vfs import Bucket

@@ -60,22 +60,20 @@ def cleanup_sql(context):
 
 
 def prepare_storage(context):
-    # target = settings.OLDSPEAK_DATADIR
-    # if os.path.isdir(target):
-    #     shutil.rmtree(target)
+    target = settings.OLDSPEAK_DATADIR
+    if os.path.isdir(target):
+        shutil.rmtree(target)
 
-    # os.makedirs(target)
-    pass
+    os.makedirs(target)
 
 
 def cleanup_storage(context):
-    # utcnow = datetime.utcnow()
-    # shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
-    pass
+    utcnow = datetime.utcnow()
+    shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
 
 
 storage_scenario = scenario([prepare_storage], [cleanup_storage])
-web_scenario = scenario([prepare_sql, prepare_server], [cleanup_server, cleanup_sql])
+web_scenario = scenario([prepare_storage, prepare_sql, prepare_server], [cleanup_server, cleanup_sql, cleanup_storage])
 sql_scenario = scenario(prepare_sql, cleanup_sql)
 api_admin_scenario = scenario([prepare_sql, prepare_server, prepare_admin_scenario], [cleanup_server, cleanup_sql])
 api_user_scenario = scenario([prepare_sql, prepare_server, prepare_subscriber_scenario], [cleanup_server, cleanup_sql])
