@@ -20,3 +20,6 @@ k43p5d10.sqlite
 data/
 venv/
 provisioning/site.retry
+data_20*
+README.html
+docs/build/html
