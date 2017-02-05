@@ -26,7 +26,7 @@ class ClientResponse(object):
         return cls(headers=response.headers, data=response.content, status_code=response.status_code, response=response)
 
     def to_python(self):
-        result = OrderedDict()
+        result = {}
         result['status_code'] = self.status_code
         result['oauth_token'] = self.oauth_token
         result['headers'] = OrderedDict(self.response.headers)
@@ -35,10 +35,12 @@ class ClientResponse(object):
         try:
             result['data'] = json.loads(self.data)
         except ValueError:
-            self.logger.exception('faile to load JSON data from response')
+            self.logger.debug('failed to load JSON data from response')
             result['data'] = {
                 'data': utf8(self.data),
             }
+
+        return result
 
 
 class InvalidServerURL(Exception):

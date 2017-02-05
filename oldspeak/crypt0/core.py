@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import gpgme
-from oldspeak.persistence.connectors import redis
+from oldspeak import settings
+# from oldspeak.persistence.connectors import redis
 
 
 def generate_temp_token(bits=128):
@@ -36,6 +37,9 @@ class GPGKeyChain(object):
     def list(self):
         return self.context.keylist()
 
+    def create_key(self, name, email):
+        return self.context.genkey()
+
 
 class UnformattedHexError(Exception):
     pass
@@ -45,10 +49,32 @@ def bytes2int(b):
     return int(b.encode('hex'), 16)
 
 
-def int_to_bytes(v):
+def int2bytes(v):
     return format('x', v).decode('hex')
 
 
 def xor(left, right):
     product = bytes2int(left) ^ bytes2int(right)
-    return int_to_bytes(product)
+    return int2bytes(product)
+
+
+class InvitationRoster(GPGKeyChain):
+    """contains all the public keys if users who haven't joined as members
+    yet."""
+    def __init__(self, data_dir=None):
+        if not data_dir:
+            data_dir = os.path.join(
+                settings.OLDSPEAK_DATADIR,
+                'invited',
+            )
+
+        if isinstance(data_dir, basestring) and not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+        self.data_dir = data_dir
+
+    def get_public_key(self, fingerprint):
+        return
+
+    def invite(self, guest_fingerprint, inviter_fingerprint):
+        return

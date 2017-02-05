@@ -68,7 +68,7 @@ smoke:
 	python -c 'from oldspeak.lib import *'
 	python -c 'from oldspeak import *'
 
-unit: smoke
+unit:
 	nosetests --rednose --cover-erase tests/unit
 
 functional:
