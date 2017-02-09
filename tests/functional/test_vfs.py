@@ -69,11 +69,11 @@ def test_core_system_storage(context):
         None,
     )
 
-    result.should.be.a(tuple)
-    result.should.have.length_of(3)
-    commit, tree, blob = result
+    # result.should.be.a(tuple)
+    # result.should.have.length_of(2)
+    # tree, blob = result
+    blob = result
 
-    commit.should.be.a('_pygit2.Commit')
-    tree.should.be.a('_pygit2.Tree')
+    # tree.should.be.a('_pygit2.Tree')
     blob.should.be.a('_pygit2.Blob')
-    system.list().should.equal(['fingerprints/9FF44C58C3F0456CCD41F4EE876863BB2759DF55.json'])
+    system.list().should.equal(['fp.9FF44C58C3F0456CCD41F4EE876863BB2759DF55.json'])

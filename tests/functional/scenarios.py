@@ -30,8 +30,8 @@ def cleanup_server(context):
 
 def prepare_admin_scenario(context):
     context.user = orm.User.using(context.db.alias).create(
-        name='Ciaus Vampstar',
-        email='cs.thevamp@gmail.com'
+        name='Mary Poppins',
+        email='mary@oldspeak.io',
     )
 
 
@@ -69,7 +69,7 @@ def prepare_storage(context):
 
 def cleanup_storage(context):
     utcnow = datetime.utcnow()
-    shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
+    # shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
 
 
 storage_scenario = scenario([prepare_storage], [cleanup_storage])

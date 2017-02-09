@@ -21,3 +21,11 @@
     - ulimit
     # - onion
     - oldspeak
+
+
+# TODO:
+# -----
+#
+# - https://github.com/jacoelho/ansible.ipsec
+# - https://en.wikipedia.org/wiki/IPsec
+# - https://github.com/neilalexander/sigmavpn/
