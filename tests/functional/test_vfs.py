@@ -45,7 +45,7 @@ def test_versioned_bucket(context):
     commit.should.be.a('_pygit2.Commit')
 
     my_bucket.write_file(
-        'todo/backlog.md',
+        'tasks/planning.md',
         '\n'.join([
             '# Backlog\n',
             '',
@@ -56,7 +56,7 @@ def test_versioned_bucket(context):
     commit = my_bucket.save('adding TO-DO list for backlog')
     commit.should.be.a('_pygit2.Commit')
 
-    my_bucket.list().should.equal(['hello-world.md', 'todo/backlog.md', 'todo/oldspeak.md'])
+    my_bucket.list().should.equal(['hello-world.md', 'oldspeak.md', 'planning.md', 'tasks/hello-world.md', 'tasks/oldspeak.md', 'tasks/planning.md', 'tasks/todo/hello-world.md', 'tasks/todo/oldspeak.md', 'todo/hello-world.md', 'todo/oldspeak.md'])
 
 
 @storage_scenario
@@ -76,4 +76,4 @@ def test_core_system_storage(context):
 
     # tree.should.be.a('_pygit2.Tree')
     blob.should.be.a('_pygit2.Blob')
-    system.list().should.equal(['fp.9FF44C58C3F0456CCD41F4EE876863BB2759DF55.json'])
+    system.list().should.equal(['9FF44C58C3F0456CCD41F4EE876863BB2759DF55.json', 'fingerprints/9FF44C58C3F0456CCD41F4EE876863BB2759DF55.json'])

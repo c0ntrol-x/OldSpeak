@@ -2,9 +2,10 @@
 import os
 import json
 import pygit2
+import logging
 from collections import OrderedDict
 from pygit2 import Repository
-# from pygit2 import GitError
+from pygit2 import GitError
 from pygit2 import init_repository
 from pygit2 import discover_repository
 
@@ -75,6 +76,7 @@ class GitRepository(object):
         return self._current_tree
 
     def new_tree(self, *args, **kw):
+        logging.warning('new_tree() {args} {kw}'.format(**locals()))
         return self.git.TreeBuilder(*args, **kw)
 
     def traverse_blobs(self, tree=None):
@@ -118,46 +120,50 @@ class GitRepository(object):
         for k, v in self.traverse_blobs(self.head.tree):
             yield k, v
 
-    def auto_write_file(self, path, thing, treebuilder, mode, commit_data=None):
-        commit_data = commit_data or {}
+    def auto_write_file(self, path, thing, treebuilder, mode, original_path=None):
+        logging.warning('auto_write_file() {path} {thing} {treebuilder} {mode}'.format(**locals()))
+
         repo = self.git
         path_parts = path.split('/', 1)
+
         if len(path_parts) == 1:  # base case
+            subtree_name = None
             treebuilder.insert(path, thing, mode)
-            # commit_data['tree'] = treebuilder
+
             result = treebuilder.write()
-            # self.commit(**commit_data)
+            logging.critical('base case: {path}'.format(**locals()))
             return result, treebuilder
 
         subtree_name, sub_path = path_parts
         tree_oid = treebuilder.write()
-        # commit_data['tree'] = treebuilder
-        # self.commit(**commit_data)
 
         tree = repo.get(tree_oid)
         try:
             entry = tree[subtree_name]
             existing_subtree = repo.get(entry.hex)
-            sub_treebuilder = self.new_tree(existing_subtree)
+            try:
+                sub_treebuilder = self.new_tree(existing_subtree)
+            except GitError:
+                logging.warning('failed to use subtree: {subtree_name} for {path} ({thing})'.format(**locals()))
+                sub_treebuilder = self.new_tree()
         except KeyError:
-            sub_treebuilder = self.new_tree()
+            sub_treebuilder = treebuilder
 
-        subtree_oid, treebuilder = self.auto_write_file(sub_path, thing, sub_treebuilder, mode)
+        subtree_oid, _ = self.auto_write_file(sub_path, thing, sub_treebuilder, mode, original_path=path)
         treebuilder.insert(subtree_name, subtree_oid, pygit2.GIT_FILEMODE_TREE)
         result = treebuilder.write()
-
-        ### commit_data['tree'] = sub_treebuilder
-        ### self.commit(**commit_data)
 
         return result, treebuilder
 
     def write_file(self, path, data, tree=None, commit_data=None):
         commit_data = commit_data or {}
         blob = self.git.create_blob(data)
-        tree_oid, tree_builder = self.auto_write_file(path, blob.hex, tree or self.tree, pygit2.GIT_FILEMODE_BLOB, commit_data)
+        root_tree_builder = tree or self.tree
+        commit_data['tree'] = root_tree_builder
+        tree_oid, tree_builder = self.auto_write_file(path, blob.hex, root_tree_builder, pygit2.GIT_FILEMODE_BLOB, path)
         tree = self.git.get(tree_oid.hex)
 
-        self.commit(tree=tree_builder)
+        self.commit(**commit_data)
         return tree, self.git.get(blob.hex)
 
     @property
@@ -177,11 +183,15 @@ class GitRepository(object):
 
         parents = []
 
+        root_tree_id = None
         if isinstance(tree, pygit2.Tree):
+            root_tree_id = tree.id
             tree = self.new_tree(tree.id)
             self._current_tree = tree
         # tree = tree or self.tree
         tree_id = tree.write()
+        if not root_tree_id:
+            root_tree_id = tree_id
 
         if self.git.head_is_unborn and len(tree) == 0:
             tree_id, blob_id = self.write_file('README', 'initial commit for {}'.format(self.name), tree=self.tree)
@@ -197,8 +207,8 @@ class GitRepository(object):
         if reference_name:
             reference = self.git.lookup_reference(reference_name)
         else:
-            reference_name = 'refs/heads/master'
             reference = None
+            reference_name = 'refs/heads/master'
 
         sha = self.git.create_commit(
             reference_name,
@@ -208,14 +218,14 @@ class GitRepository(object):
             tree_id,
             parents
         )
-
         commit = self.git.get(sha)
-        # self.git.set_head(sha)
+
+        if not reference:
+            reference = self.git.create_reference(reference_name, sha, True)
+
+        self.git.set_head(sha)
+        self.git.head.set_target(sha)
         self.git.reset(sha, pygit2.GIT_RESET_HARD)
-
-        reference = self.git.create_reference('refs/heads/master', sha, True)
-
-        self.git.head.set_target(reference.get_object().id)
 
         self.commit_cache.append((sha, tree_id, parents))
         return commit
@@ -279,7 +289,7 @@ class System(Bucket):
         return '/'.join(filter(bool, ('system', self.child)))
 
     def add_fingerprint(self, fingerprint, email, parent_fingerprint, **kw):
-        blob = self.write_file('fp.{}.json'.format(fingerprint), json.dumps({
+        blob = self.write_file('fingerprints/{}.json'.format(fingerprint), json.dumps({
             'email': email,
             'fingerprint': fingerprint,
             'parent_fingerprint': parent_fingerprint,
