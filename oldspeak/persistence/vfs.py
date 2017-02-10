@@ -117,13 +117,13 @@ class AutoTreeBuilder(object):
             if index is 0:
                 logging.warning('inserting blob {}'.format(node.name))
                 child_tree.insert(node.name, content, pygit2.GIT_FILEMODE_BLOB)
+                content = child_tree.write()
             else:
                 logging.warning('inserting tree {}'.format(node.name))
-                current_tree.insert(node.name, content, pygit2.GIT_FILEMODE_TREE)
+                child_tree.insert(node.name, content, pygit2.GIT_FILEMODE_TREE)
+                content = current_tree.write()
 
-            content = current_tree.write()
-
-        new_root_id = trees[-1].write()
+        new_root_id = current_tree.write()
 
         parents = []
         if self.head:
