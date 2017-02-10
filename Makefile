@@ -71,10 +71,11 @@ smoke:
 unit:
 	nosetests --rednose --cover-erase tests/unit
 
-functional:
-	nosetests --with-spec --spec-color tests/functional/
+functional: database
+	# nosetests --with-spec --spec-color tests/functional/
+	nosetests --rednose tests/functional/
 
-integration:
+integration: database
 	python -c 'import oldspeak.http'
 	python -c 'import oldspeak.persistence'
 	python tests/integration.py
@@ -91,6 +92,10 @@ pip:
 	@pip install -U setuptools
 	@pip install -r requirements.txt
 	@pip install -r development.txt
+
+database:
+	echo "DROP DATABASE IF EXISTS 01d5p34k;" | mysql -uroot
+	echo "CREATE DATABASE 01d5p34k;" | mysql -uroot
 
 
 pythonpath:

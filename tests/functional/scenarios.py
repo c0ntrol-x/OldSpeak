@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 import os
 import shutil
+import logging
+import coloredlogs
 from sure import scenario
-from datetime import datetime
+# from datetime import datetime
 from oldspeak import settings
 from oldspeak.persistence import connectors
 from oldspeak.persistence.sql.mapper import metadata, orm
 from oldspeak.http.server import Application
 from oldspeak.lib.clients import OldSpeakClient
 from oldspeak.lib.networking import get_free_tcp_port
+
+coloredlogs.install(logging.DEBUG)
 
 
 def prepare_server(context):
@@ -68,8 +72,9 @@ def prepare_storage(context):
 
 
 def cleanup_storage(context):
-    utcnow = datetime.utcnow()
+    # utcnow = datetime.utcnow()
     # shutil.copytree(settings.OLDSPEAK_DATADIR, '_'.join((settings.OLDSPEAK_DATADIR, utcnow.isoformat())))
+    pass
 
 
 storage_scenario = scenario([prepare_storage], [cleanup_storage])
